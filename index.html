@@ -706,11 +706,30 @@ body::after {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const ANTHROPIC_API_KEY = '';
 const WAKE_HOUR  = 8;
 const SLEEP_HOUR = 24;
 const CIRCUMFERENCE = 2 * Math.PI * 52;
+
+// ── Supabase ──
+const SUPABASE_URL = 'https://fgdlmjslskxroqumarzw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_F94hPDT4Zywv_bqzIlkwEQ_5Qb_beDg';
+const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function syncFromSupabase() {
+  try {
+    const [{ data: goals }, { data: settings }] = await Promise.all([
+      sbClient.from('goals').select('*'),
+      sbClient.from('settings').select('*')
+    ]);
+    if (goals) goals.forEach(r => localStorage.setItem(`goals:${r.date}`, JSON.stringify(r.data)));
+    if (settings) settings.forEach(r => localStorage.setItem(r.key, JSON.stringify(r.value)));
+  } catch (e) {
+    console.warn('Supabase sync failed, using local data', e);
+  }
+}
 
 // ── Storage ──
 function storeGet(key) {
@@ -718,9 +737,21 @@ function storeGet(key) {
 }
 function storeSet(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
-  if (key.startsWith('goals:')) window.dispatchEvent(new CustomEvent('goals-changed'));
+  if (key.startsWith('goals:')) {
+    window.dispatchEvent(new CustomEvent('goals-changed'));
+    sbClient.from('goals').upsert({ date: key.replace('goals:', ''), data: value }).then(() => {});
+  } else {
+    sbClient.from('settings').upsert({ key, value }).then(() => {});
+  }
 }
-function storeDelete(key) { localStorage.removeItem(key); }
+function storeDelete(key) {
+  localStorage.removeItem(key);
+  if (key.startsWith('goals:')) {
+    sbClient.from('goals').delete().eq('date', key.replace('goals:', '')).then(() => {});
+  } else {
+    sbClient.from('settings').delete().eq('key', key).then(() => {});
+  }
+}
 function storeListKeys(prefix) {
   const keys = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -1165,7 +1196,8 @@ document.getElementById('gmPushBtn').addEventListener('click', () => {
 });
 
 // ── Init ──
-(function init() {
+(async function init() {
+  await syncFromSupabase();
   runRollover();
   runStreakCheck();
 
