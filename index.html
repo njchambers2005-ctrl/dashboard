@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
 <title>Nick's Dashboard</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -620,7 +623,7 @@ body::after {
   gap: 8px; padding: 12px 14px; border-radius: 13px;
   font-size: 14px; font-weight: 600; letter-spacing: 0.01em;
   color: var(--text-2); text-decoration: none; background: transparent;
-  border: 1px solid transparent;
+  border: 1px solid transparent; cursor: pointer; font-family: var(--font-sans);
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1265,14 +1268,14 @@ document.getElementById('gmPushBtn').addEventListener('click', () => {
 
 <nav class="tabbar" aria-label="Main navigation">
   <div class="tabbar-inner">
-    <a href="index.html" class="tab" aria-current="page">
+    <button class="tab" aria-current="page" onclick="void(0)">
       <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
       Dashboard
-    </a>
-    <a href="gym.html" class="tab">
+    </button>
+    <button class="tab" onclick="window.location.href='gym.html'">
       <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
       Gym
-    </a>
+    </button>
   </div>
 </nav>
 </body>
